@@ -1,5 +1,5 @@
 import { Bvh, OrbitControls, KeyboardControls, Preload, useTexture,} from "@react-three/drei";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect } from "react";
 import { TrackScene } from "./TrackScene";
 import { Lighting } from "./misc/Lighting";
 import VFXParticles from "./wawa-vfx/VFXParticles";
@@ -27,28 +27,16 @@ export const App = () => {
   const setNoiseTexture = useGameStore((state) => state.setNoiseTexture);
   const {camera} = useThree();
   
-  const { isTimeTrial, gameStarted, updateLapTime } = useGameManager();
-  
-  // Update time in both game modes
-  const lastLogTimeRef = useRef(0);
-  
+  const { gameStarted, updateLapTime } = useGameManager();
+
   useFrame((state, delta) => {
     if (gameStarted) {
       // Ensure delta is positive and not too large to prevent weird jumps
       const validDelta = Math.max(0, Math.min(delta, 0.1));
-      
       // Convert to milliseconds for time display
       const deltaMs = validDelta * 1000;
-      
       // Update time for both time trial and regular mode
       updateLapTime(deltaMs);
-      
-      // Log timer updates occasionally (every 2 seconds) to avoid console spam
-      const now = performance.now();
-      if (now - lastLogTimeRef.current > 2000) {
-        lastLogTimeRef.current = now;
-        console.log(`Timer update: total=${formatTime(totalTime)}, lap=${isTimeTrial ? formatTime(currentLapTime) : "N/A"}`);
-      }
     }
   });
 

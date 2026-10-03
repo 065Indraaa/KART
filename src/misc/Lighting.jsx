@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { EnvironmentSphere } from "./EnvironmentSphere";
 import { Helper } from "@react-three/drei";
 import { CameraHelper } from "three";
+import { palette } from "../theme";
 
 export const Lighting = () => {
   const directionalLight = useRef(null)
@@ -30,12 +31,13 @@ export const Lighting = () => {
   
   return (
     <>
+      {/* Warm tropical key light + player-following shadow camera. */}
       <directionalLight
             castShadow
             ref={directionalLight}
             position={[0, 0, 0]}
-            intensity={3}
-            color={"#FFffff"}
+            intensity={3.2}
+            color={"#fff1d6"}
             shadow-bias={-0.0001}
             shadow-mapSize={[2048, 2048]}
             // layers={1}
@@ -53,13 +55,12 @@ export const Lighting = () => {
               {/* <Helper type={CameraHelper} /> */}
             </orthographicCamera>
           </directionalLight>
-          {/* <directionalLight 
-          position={[20, 20, -100]}
-          color={"#FFA22B"}
-          intensity={10}
 
-          /> */}
-            
+          {/* Soft sky/sand fill so shadows stay open and readable (no extra shadow map). */}
+          <hemisphereLight
+            args={[palette.skyHorizon, palette.sand, 0.6]}
+          />
+
           <EnvironmentSphere />
     </>
   );

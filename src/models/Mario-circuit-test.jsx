@@ -28,8 +28,12 @@ export function Track(props) {
       <mesh name="ground dirt" receiveShadow geometry={nodes.Object_11.geometry} material={materials.material_6} />
       <mesh name="ground" receiveShadow geometry={nodes.Object_12.geometry} material={materials.material_7} />
       <mesh name="ground" receiveShadow geometry={nodes.Object_13.geometry} material={materials.material_8} />
-      <mesh name="ground" receiveShadow geometry={nodes.Object_18.geometry} material={materials.material_12} />
-      <mesh name="ground" receiveShadow geometry={nodes.Object_22.geometry} material={materials.material_16} />
+      {/* Object_18 is the scenery sky dome and Object_22 a small prop: neither is
+    drivable, so they must NOT be named "ground" - useGroundSampler collects
+    every mesh whose name contains "ground", and a kart sampling the sky dome
+    rides/clips outside the real road. */}
+      <mesh name="scenery sky" receiveShadow geometry={nodes.Object_18.geometry} material={materials.material_12} />
+      <mesh name="scenery prop" receiveShadow geometry={nodes.Object_22.geometry} material={materials.material_16} />
       <mesh ref={trackRef} name="ground" receiveShadow geometry={nodes.Object_24.geometry} material={materials.material_18} />
       <mesh name="ground" receiveShadow geometry={nodes.Object_25.geometry} material={materials.material_19} />
       <mesh name="ground speed" receiveShadow geometry={nodes.Object_27.geometry} material={materials.material_21} />

@@ -1,104 +1,94 @@
-import { useEffect, useState, Suspense } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import { WebGPUCanvas } from './WebGPUCanvas.jsx'
-import { MobileControls } from './mobile/MobileControls.jsx'
-import { LoadingScreen } from './LoadingScreen.jsx'
-import HomePage from './HomePage.jsx'
-import GameUI from './GameUI.jsx'
-import GameReadyCheck from './GameReadyCheck.jsx'
-import { useGameManager } from './gameManager.js'
+import { useEffect, Suspense } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import "./ui/screens.css";
+import { WebGPUCanvas } from "./WebGPUCanvas.jsx";
+import { MobileControls } from "./mobile/MobileControls.jsx";
+import { LoadingScreen } from "./LoadingScreen.jsx";
+import MainMenu from "./ui/MainMenu.jsx";
+import Garage from "./ui/Garage.jsx";
+import Results from "./ui/Results.jsx";
+import HUD from "./ui/HUD.jsx";
+import { useRace, PHASE } from "./raceStore.js";
+import * as audio from "./audio/audioManager.js";
+
+// GO fades to nothing; 3/2/1 pulse. Driven by raceStore.countdown.
+const Countdown = () => {
+  const countdown = useRace((s) => s.countdown);
+  if (countdown == null) return null;
+  return (
+    <div className="dtf-countdown">
+      <span className="dtf-countdown__num">{countdown === 0 ? "GO!" : countdown}</span>
+    </div>
+  );
+};
 
 const Root = () => {
-  const { 
-    showHomepage, 
-    isPlaying, 
-    startGame, 
-    startCountdown, 
-    gameStarted 
-  } = useGameManager();
+  const phase = useRace((s) => s.phase);
+  const setPhase = useRace((s) => s.setPhase);
+  const resetRace = useRace((s) => s.resetRace);
 
-  // Initialize audio context on user interaction
+  // Unlock + preload audio on the first user gesture (browser autoplay policy).
   useEffect(() => {
-    // Create a function to initialize audio
-    const initAudio = () => {
-      try {
-        // Create audio context to unlock audio on iOS/Safari
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-          const audioCtx = new AudioContext();
-          // Create and play a silent buffer to unlock audio
-          const buffer = audioCtx.createBuffer(1, 1, 22050);
-          const source = audioCtx.createBufferSource();
-          source.buffer = buffer;
-          source.connect(audioCtx.destination);
-          source.start(0);
-          
-          // Resume audio context if suspended
-          if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-          }
-          
-          console.log('Audio initialized');
-        }
-      } catch (e) {
-        console.warn('Web Audio API not supported');
-      }
-      
-      // Remove event listeners once audio is initialized
-      document.removeEventListener('click', initAudio);
-      document.removeEventListener('touchstart', initAudio);
-      document.removeEventListener('keydown', initAudio);
+    const kick = () => {
+      audio.unlock();
+      audio.preload();
     };
-    
-    // Add event listeners for user interaction
-    document.addEventListener('click', initAudio);
-    document.addEventListener('touchstart', initAudio);
-    document.addEventListener('keydown', initAudio);
-    
+    document.addEventListener("click", kick, { once: true });
+    document.addEventListener("touchstart", kick, { once: true });
+    document.addEventListener("keydown", kick, { once: true });
     return () => {
-      // Clean up listeners
-      document.removeEventListener('click', initAudio);
-      document.removeEventListener('touchstart', initAudio);
-      document.removeEventListener('keydown', initAudio);
+      document.removeEventListener("click", kick);
+      document.removeEventListener("touchstart", kick);
+      document.removeEventListener("keydown", kick);
     };
   }, []);
 
-  const handleStartGame = () => {
-    startGame(false); // Regular mode
-    setTimeout(() => {
-      startCountdown(); // Start the countdown after state update completes
-    }, 100);
+  const startRace = () => {
+    resetRace();
+    setPhase(PHASE.COUNTDOWN);
   };
 
-  const handleTimeTrial = () => {
-    startGame(true); // Time Trial mode
-    setTimeout(() => {
-      startCountdown(); // Start the countdown after state update completes
-    }, 100);
-  };
+  const inGame =
+    phase === PHASE.COUNTDOWN ||
+    phase === PHASE.RACING ||
+    phase === PHASE.FINISHED ||
+    phase === PHASE.RESULTS;
+
+  const showHud =
+    phase === PHASE.COUNTDOWN || phase === PHASE.RACING || phase === PHASE.FINISHED;
 
   return (
     <>
-      {showHomepage ? (
-        <HomePage onStartGame={handleStartGame} onTimeTrial={handleTimeTrial} />
-      ) : (
-        <div className='canvas-container'>
+      {phase === PHASE.MENU && (
+        <MainMenu onPlay={startRace} onGarage={() => setPhase(PHASE.GARAGE)} />
+      )}
+
+      {phase === PHASE.GARAGE && (
+        <Garage onBack={() => setPhase(PHASE.MENU)} onRace={startRace} />
+      )}
+
+      {inGame && (
+        <div className="canvas-container">
           <MobileControls />
           <Suspense fallback={false}>
             <WebGPUCanvas />
           </Suspense>
-          {/* Always show LoadingScreen initially; it will handle its own visibility */}
           <LoadingScreen />
-          {/* Only show GameUI when game has actually started */}
-          {gameStarted && <GameUI />}
-          {/* Safety mechanism to ensure game starts */}
-          <GameReadyCheck />
-          <div className="version">v0.4.0</div>
+          {showHud && <HUD />}
+          <Countdown />
+          {phase === PHASE.RESULTS && (
+            <Results
+              onMenu={() => setPhase(PHASE.MENU)}
+              onRetry={startRace}
+              onGarage={() => setPhase(PHASE.GARAGE)}
+            />
+          )}
+          <div className="version">v0.5.0</div>
         </div>
       )}
     </>
   );
 };
 
-createRoot(document.getElementById('root')).render(<Root />)
+createRoot(document.getElementById("root")).render(<Root />);

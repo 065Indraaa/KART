@@ -2,10 +2,12 @@ import { Environment, useTexture } from "@react-three/drei";
 import { Color, DoubleSide } from "three";
 import vertexShader from "./vertex.glsl";
 import fragmentShader from "./fragment.glsl";
+import { palette } from "../theme";
 
 export const EnvironmentSphere = () => {
-const color1 = "#9bdbd9";
-const color2 = "#137aff";
+  // Tropical gradient: bright cyan-white horizon -> deep blue zenith.
+  const color1 = palette.skyHorizon; // horizon
+  const color2 = palette.skyZenith;  // zenith
   
   const sunTexture = useTexture('/textures/sun.png')
 

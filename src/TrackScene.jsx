@@ -1,17 +1,19 @@
-import { PlayerController } from "./PlayerController";
-import { Grid } from "@react-three/drei";
+import { RaceManager } from "./race/RaceManager";
 import Flames from "./particles/drift/flames/Flames";
-import {Track} from './models/Mario-circuit-test';
+import { Track } from "./models/Mario-circuit-test";
+import TropicalEnvironment from "./misc/TropicalEnvironment";
+import { ObjectVFX } from "./objects/ObjectVFX";
+
 export const TrackScene = () => {
   return (
     <>
-      <PlayerController />
+      <RaceManager />
       <Track />
 
+      <TropicalEnvironment />
+      <ObjectVFX />
 
       <Flames />
-
-      {/* <Grid position={[0, -1.99, 0]} infiniteGrid/> */}
     </>
   );
 };

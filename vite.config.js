@@ -9,8 +9,8 @@ export default defineConfig({
        registerType: 'autoUpdate',
        includeAssets: [ 'favicon.ico'],
        manifest: {
-         name: 'Mario Kart 3.js',
-         short_name: 'MK3.JS',
+         name: 'Dodge the FUD',
+         short_name: 'DTF',
          start_url: '/',
          display: 'standalone',
          background_color: '#FF0000',

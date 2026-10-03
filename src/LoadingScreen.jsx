@@ -4,7 +4,7 @@ import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useGameManager } from "./gameManager";
 
-const BUTTON_TEXT = "Loading...";
+const BUTTON_TEXT = "DODGE THE FUD";
 
 export const LoadingScreen = () => {
   const containerRef = useRef(null);
@@ -127,13 +127,6 @@ export const LoadingScreen = () => {
                 );
               }
             })}
-          </div>
-          
-          <div className="mention">
-            The following is a non-profit, fan-based project, <br/>
-            and is in no way affiliated with <strong>NINTENDO CO. LTD.</strong>
-            
-            The <strong>Mario Kart</strong> intellectual property is owned by <strong>NINTENDO</strong>
           </div>
           <img
             ref={backgroundRef}
